@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { generateMenu, type MenuConstraints } from '@/lib/api';
+import { generateMenu, listVibeTags, type MenuConstraints } from '@/lib/api';
 
 const COURSE_OPTIONS = [
   { key: 'appetizer', label: 'Appetizer', emoji: '🥗' },
@@ -46,7 +46,8 @@ interface FormState {
   cuisines: string[];
   customCuisine: string;
   occasion: string;
-  vibe: string;
+  vibePills: string[];
+  vibeCustom: string;
   season: string;
   location: string;
   dietary_restrictions: string[];
@@ -71,7 +72,8 @@ const defaultForm: FormState = {
   cuisines: [],
   customCuisine: '',
   occasion: '',
-  vibe: '',
+  vibePills: [],
+  vibeCustom: '',
   season: '',
   location: '',
   dietary_restrictions: [],
@@ -92,6 +94,11 @@ export default function ConstraintForm() {
   const [form, setForm] = useState<FormState>(defaultForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dbVibeTags, setDbVibeTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    listVibeTags().then(setDbVibeTags).catch(() => {});
+  }, []);
 
   const toggleCourse = (key: CourseKey) =>
     setForm(f => ({ ...f, courses: { ...f.courses, [key]: { ...f.courses[key], selected: !f.courses[key].selected } } }));
@@ -114,6 +121,12 @@ export default function ConstraintForm() {
       dietary_restrictions: f.dietary_restrictions.includes(r)
         ? f.dietary_restrictions.filter(x => x !== r)
         : [...f.dietary_restrictions, r],
+    }));
+
+  const toggleVibePill = (v: string) =>
+    setForm(f => ({
+      ...f,
+      vibePills: f.vibePills.includes(v) ? f.vibePills.filter(x => x !== v) : [...f.vibePills, v],
     }));
 
   const toggleEquipment = (e: string) =>
@@ -145,7 +158,7 @@ export default function ConstraintForm() {
       cook_time_minutes: form.time_mode === 'split' ? form.cook_time_minutes : null,
       total_time_minutes: form.time_mode === 'total' ? form.total_time_minutes : null,
       occasion: form.occasion || null,
-      vibe: form.vibe || null,
+      vibe: [...form.vibePills, form.vibeCustom.trim()].filter(Boolean).join(', ') || null,
       season: form.season.toLowerCase() || null,
       location: form.location || null,
       budget_per_person: form.budget_per_person || null,
@@ -253,8 +266,31 @@ export default function ConstraintForm() {
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-medium text-stone-700 mb-1">Desired vibe</label>
-              <input type="text" placeholder="e.g. cozy and intimate, elegant and refined, fun and festive..." value={form.vibe} onChange={e => setForm(f => ({ ...f, vibe: e.target.value }))} className="w-full px-3 py-2 text-sm border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
+              <label className="block text-sm font-medium text-stone-700 mb-2">Desired vibe</label>
+              {dbVibeTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {dbVibeTags.map(v => (
+                    <button
+                      key={v}
+                      onClick={() => toggleVibePill(v)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium border capitalize transition-all ${
+                        form.vibePills.includes(v)
+                          ? 'bg-purple-700 text-white border-purple-700'
+                          : 'bg-white text-stone-600 border-stone-300 hover:border-purple-400'
+                      }`}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <input
+                type="text"
+                placeholder="Or describe in your own words…"
+                value={form.vibeCustom}
+                onChange={e => setForm(f => ({ ...f, vibeCustom: e.target.value }))}
+                className="w-full px-3 py-2 text-sm border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
             </div>
 
             <div className="mb-5">

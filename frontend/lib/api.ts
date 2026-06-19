@@ -99,6 +99,10 @@ export async function getGroceryList(menuId: string): Promise<GroceryList> {
   return apiFetch(`/api/menu/${menuId}/grocery-list`, { method: 'POST' });
 }
 
+export async function listVibeTags(): Promise<string[]> {
+  return apiFetch('/api/recipes/vibe-tags');
+}
+
 export async function scrapeRecipe(url: string, courseType: string, cuisineTags: string[]) {
   return apiFetch('/api/recipes/scrape', {
     method: 'POST',

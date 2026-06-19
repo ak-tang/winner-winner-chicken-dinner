@@ -37,6 +37,16 @@ def scrape_and_store(request: ScrapeRequest):
     return {"id": recipe_id, "title": recipe_data['title'], "message": "Recipe stored successfully"}
 
 
+@router.get("/vibe-tags")
+def get_vibe_tags():
+    """Return all distinct vibe tags currently in the recipe library."""
+    result = supabase.table("recipes").select("vibe_tags").execute()
+    tags: set[str] = set()
+    for row in result.data:
+        tags.update(row.get("vibe_tags") or [])
+    return sorted(tags)
+
+
 @router.get("/")
 def list_recipes(course_type: Optional[str] = None):
     query = supabase.table("recipes").select("*, ingredients(*)")
