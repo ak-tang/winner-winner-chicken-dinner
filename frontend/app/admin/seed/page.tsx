@@ -176,7 +176,7 @@ export default function SeedPage() {
             </div>
           </Section>
 
-          <Section title="Cuisine" hint="(optional — Claude auto-detects; add extras here)">
+          <Section title="Cuisine" hint="(optional — Claude auto-detects)">
             <div className="flex gap-2 flex-wrap mb-2">
               {CUISINE_OPTIONS.map(c => (
                 <TagPill
@@ -196,7 +196,7 @@ export default function SeedPage() {
             />
           </Section>
 
-          <Section title="Vibe" hint="(optional)">
+          <Section title="Vibe" hint="(optional — Claude auto-detects)">
             <div className="flex gap-2 flex-wrap mb-2">
               {VIBE_OPTIONS.map(v => (
                 <TagPill
@@ -216,7 +216,7 @@ export default function SeedPage() {
             />
           </Section>
 
-          <Section title="Season" hint="(optional)">
+          <Section title="Season" hint="(optional — Claude auto-detects)">
             <div className="flex gap-2 flex-wrap">
               {SEASON_OPTIONS.map(s => (
                 <TagPill
@@ -242,7 +242,7 @@ export default function SeedPage() {
             </div>
           </Section>
 
-          <Section title="Equipment needed" hint="(optional)">
+          <Section title="Equipment needed" hint="(optional — Claude auto-detects)">
             <div className="flex gap-2 flex-wrap mb-2">
               {EQUIPMENT_OPTIONS.map(e => (
                 <TagPill
