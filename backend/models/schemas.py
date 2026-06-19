@@ -10,6 +10,7 @@ class CourseConstraint(BaseModel):
 
 
 class MenuConstraints(BaseModel):
+    # M1
     courses: List[CourseConstraint]
     cuisines: List[str] = []
     dietary_restrictions: List[str] = []
@@ -20,6 +21,12 @@ class MenuConstraints(BaseModel):
     cook_time_minutes: Optional[int] = None
     total_time_minutes: Optional[int] = None
     occasion: Optional[str] = None
+    # M2
+    vibe: Optional[str] = None
+    season: Optional[str] = None       # spring | summer | fall | winter
+    location: Optional[str] = None
+    budget_per_person: Optional[str] = None  # budget | mid | expensive
+    equipment_unavailable: List[str] = []
 
 
 class IngredientOut(BaseModel):
@@ -46,11 +53,13 @@ class MenuRecipe(BaseModel):
     servings: Optional[int] = None
     cuisine_tags: List[str] = []
     dietary_tags: List[str] = []
+    vibe_tags: List[str] = []
+    season_tags: List[str] = []
+    cost_level: Optional[str] = None
+    equipment_tags: List[str] = []
 
 
-class MenuResponse(BaseModel):
-    id: Optional[str] = None
-    constraints: dict
-    recipes: List[MenuRecipe]
-    explanation: str
-    created_at: Optional[str] = None
+class ReplaceRequest(BaseModel):
+    course_type: str
+    current_recipe_id: str
+    constraints: MenuConstraints

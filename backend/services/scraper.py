@@ -1,6 +1,7 @@
 import re
 from typing import List
 from recipe_scrapers import scrape_me
+from services.claude_service import tag_recipe
 
 
 MEAT_KEYWORDS = {'chicken', 'beef', 'pork', 'lamb', 'turkey', 'fish', 'salmon', 'tuna', 'shrimp', 'prawn',
@@ -64,6 +65,12 @@ def scrape_recipe(url: str, course_type: str, cuisine_tags: List[str]) -> dict:
         if m:
             servings = int(m.group())
 
+    # Claude auto-tagging for M2 columns
+    try:
+        claude_tags = tag_recipe(scraper.title(), ingredients_raw, instructions)
+    except Exception:
+        claude_tags = {"vibe_tags": [], "season_tags": [], "cost_level": "mid", "equipment_tags": []}
+
     recipe_data = {
         'title': scraper.title(),
         'source_url': url,
@@ -76,6 +83,10 @@ def scrape_recipe(url: str, course_type: str, cuisine_tags: List[str]) -> dict:
         'dietary_tags': dietary_tags,
         'image_url': image,
         'instructions': instructions,
+        'vibe_tags': claude_tags.get('vibe_tags', []),
+        'season_tags': claude_tags.get('season_tags', []),
+        'cost_level': claude_tags.get('cost_level'),
+        'equipment_tags': claude_tags.get('equipment_tags', []),
     }
 
     ingredients_data = [

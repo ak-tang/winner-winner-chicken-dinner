@@ -37,7 +37,7 @@ export default function SeedPage() {
     setLoading(true);
     setMessage(null);
     try {
-      const result = await scrapeRecipe(url.trim(), courseType, cuisines);
+      const result = await scrapeRecipe(url.trim(), courseType, cuisines) as { title: string };
       setMessage({ type: 'success', text: `✓ Saved: "${result.title}"` });
       setUrl('');
     } catch (e) {
@@ -50,7 +50,7 @@ export default function SeedPage() {
   const loadRecipes = async () => {
     setLoadingRecipes(true);
     try {
-      const data = await listRecipes();
+      const data = await listRecipes() as Recipe[];
       setRecipes(data);
     } catch {
       setRecipes([]);
