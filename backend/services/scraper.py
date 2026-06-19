@@ -60,7 +60,7 @@ def scrape_recipe(
     cost_level: Optional[str],
     equipment_tags: List[str],
 ) -> dict:
-    scraper = scrape_me(url, wild_mode=True)
+    scraper = scrape_me(url)
 
     ingredients_raw: List[str] = scraper.ingredients()
     dietary_tags = _detect_dietary_tags(ingredients_raw, scraper.title())
