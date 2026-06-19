@@ -12,7 +12,11 @@ const COURSE_ORDER = ['drink', 'appetizer', 'main', 'dessert'];
 
 export default function MenuPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [menu, setMenu] = useState<MenuResponse | null>(null);
+  const [menu, setMenu] = useState<MenuResponse | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const cached = sessionStorage.getItem(`menu:${id}`);
+    return cached ? JSON.parse(cached) : null;
+  });
   const [error, setError] = useState<string | null>(null);
   const [swappingId, setSwappingId] = useState<string | null>(null);
   const [swapReason, setSwapReason] = useState<{ id: string; reason: string } | null>(null);
@@ -21,15 +25,13 @@ export default function MenuPage({ params }: { params: Promise<{ id: string }> }
   const [showGrocery, setShowGrocery] = useState(false);
 
   useEffect(() => {
-    const cached = sessionStorage.getItem(`menu:${id}`);
-    if (cached) { setMenu(JSON.parse(cached)); return; }
-
+    if (menu) return;
     const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
     fetch(`${apiBase}/api/menu/${id}`)
       .then(r => { if (!r.ok) throw new Error('Menu not found'); return r.json(); })
       .then(setMenu)
       .catch(e => setError(e.message));
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSwap = async (recipe: MenuRecipe) => {
     if (!menu) return;
