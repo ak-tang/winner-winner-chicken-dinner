@@ -52,12 +52,6 @@ Rules:
         result["cost_level"] = "mid"
     if result.get("course_type") not in COURSE_OPTIONS:
         result["course_type"] = "main"
-    if not result.get("cuisine_tags"):
-        result["cuisine_tags"] = ["international"]
-    if not result.get("vibe_tags"):
-        result["vibe_tags"] = ["casual"]
-    if not result.get("season_tags"):
-        result["season_tags"] = ["year-round"]
 
     return result
 
