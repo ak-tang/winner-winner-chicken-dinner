@@ -32,13 +32,13 @@ Return ONLY valid JSON, no markdown:
   "equipment_tags": []
 }}
 
-Valid values:
-- course_type: one of {COURSE_OPTIONS}
-- cuisine_tags: list of cuisine styles the recipe belongs to (e.g. ["Italian", "Mediterranean"])
-- vibe_tags: subset of {VIBE_OPTIONS}
-- season_tags: subset of {SEASON_OPTIONS}
-- cost_level: one of {COST_OPTIONS}
-- equipment_tags: subset of {EQUIPMENT_OPTIONS}"""
+Rules:
+- course_type: one of {COURSE_OPTIONS} — required
+- cuisine_tags: list of cuisine styles (e.g. ["Italian", "Mediterranean"]) — include at least one
+- vibe_tags: subset of {VIBE_OPTIONS} — include at least one that fits
+- season_tags: subset of {SEASON_OPTIONS} — include at least one; use "year-round" if it suits any season
+- cost_level: one of {COST_OPTIONS} — required
+- equipment_tags: subset of {EQUIPMENT_OPTIONS} — leave empty [] if none apply"""
 
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
@@ -47,10 +47,18 @@ Valid values:
     )
 
     result = json.loads(message.content[0].text)
+
     if result.get("cost_level") not in COST_OPTIONS:
         result["cost_level"] = "mid"
     if result.get("course_type") not in COURSE_OPTIONS:
         result["course_type"] = "main"
+    if not result.get("cuisine_tags"):
+        result["cuisine_tags"] = ["international"]
+    if not result.get("vibe_tags"):
+        result["vibe_tags"] = ["casual"]
+    if not result.get("season_tags"):
+        result["season_tags"] = ["year-round"]
+
     return result
 
 
