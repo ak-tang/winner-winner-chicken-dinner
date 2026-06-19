@@ -14,6 +14,29 @@ EGG_KEYWORDS = {'egg', 'eggs', 'egg white', 'egg yolk', 'mayonnaise'}
 NUT_KEYWORDS = {'almond', 'walnut', 'pecan', 'cashew', 'peanut', 'pistachio', 'hazelnut', 'pine nut',
                 'macadamia', 'chestnut'}
 
+# Maps each hardcoded equipment tag to keywords that indicate it's used
+EQUIPMENT_KEYWORDS: dict = {
+    'oven':           {'oven', 'bake', 'baked', 'baking', 'roast', 'roasted', 'roasting', 'broil', 'broiled', 'broiling'},
+    'stovetop':       {'stovetop', 'skillet', 'sauté', 'saute', 'sautéed', 'sauteed', 'pan', 'saucepan', 'pot',
+                       'simmer', 'boil', 'boiled', 'fry', 'fried', 'stir-fry', 'stir fry'},
+    'grill':          {'grill', 'grilled', 'grilling', 'barbecue', 'bbq', 'charcoal', 'outdoor grill'},
+    'slow-cooker':    {'slow cooker', 'slow-cooker', 'crockpot', 'crock pot'},
+    'stand-mixer':    {'stand mixer', 'stand-mixer', 'electric mixer', 'paddle attachment', 'dough hook'},
+    'food-processor': {'food processor', 'food-processor', 'pulse', 'blender', 'blend'},
+    'no-cook':        {'no-cook', 'no cook', 'no bake', 'no-bake', 'raw', 'uncooked'},
+    'instant-pot':    {'instant pot', 'instant-pot', 'pressure cooker', 'pressure cook'},
+    'deep-fryer':     {'deep fry', 'deep-fry', 'deep frying', 'deep-frying', 'deep fryer'},
+}
+
+
+def _detect_equipment_tags(ingredients: List[str], instructions: Optional[str], title: str) -> List[str]:
+    text = " ".join(ingredients + [title, instructions or '']).lower()
+    detected = []
+    for equipment, keywords in EQUIPMENT_KEYWORDS.items():
+        if any(kw in text for kw in keywords):
+            detected.append(equipment)
+    return detected
+
 
 def _detect_dietary_tags(ingredients: List[str], title: str) -> List[str]:
     all_text = " ".join(ingredients + [title]).lower()
@@ -84,6 +107,8 @@ def scrape_recipe(
         if m:
             servings = int(m.group())
 
+    keyword_equipment = _detect_equipment_tags(ingredients_raw, instructions, scraper.title())
+
     # Claude Haiku auto-tags everything including course_type and cuisine
     try:
         claude_tags = tag_recipe(scraper.title(), ingredients_raw, instructions)
@@ -98,7 +123,7 @@ def scrape_recipe(
         }
 
     # User-supplied tags take precedence for course_type/cost_level (single values);
-    # for list tags, merge both sets
+    # for list tags, merge all three sources: keyword detection + Claude + user
     final_course_type = course_type or claude_tags.get('course_type', 'main')
     final_cost_level = cost_level or claude_tags.get('cost_level', 'mid')
 
@@ -117,7 +142,7 @@ def scrape_recipe(
         'vibe_tags': _merge(vibe_tags, claude_tags.get('vibe_tags', [])),
         'season_tags': _merge(season_tags, claude_tags.get('season_tags', [])),
         'cost_level': final_cost_level,
-        'equipment_tags': _merge(equipment_tags, claude_tags.get('equipment_tags', [])),
+        'equipment_tags': _merge(equipment_tags, _merge(claude_tags.get('equipment_tags', []), keyword_equipment)),
     }
 
     ingredients_data = [
