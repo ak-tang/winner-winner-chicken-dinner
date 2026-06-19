@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 import anthropic
 from models.schemas import MenuConstraints
 
@@ -8,7 +9,7 @@ COST_OPTIONS = ["budget", "mid", "expensive"]
 EQUIPMENT_OPTIONS = ["oven", "stovetop", "grill", "slow-cooker", "stand-mixer", "food-processor", "no-cook", "instant-pot", "deep-fryer"]
 
 
-def tag_recipe(title: str, ingredients: list[str], instructions: str | None) -> dict:
+def tag_recipe(title: str, ingredients: list, instructions: Optional[str]) -> dict:
     """Use Claude Haiku to auto-tag a recipe with vibe, season, cost, and equipment labels."""
     client = anthropic.Anthropic()
 

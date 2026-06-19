@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from typing import Optional
+from typing import Optional, Set
 from models.schemas import ScrapeRequest
 from services.scraper import scrape_recipe
 from database import supabase
@@ -41,7 +41,7 @@ def scrape_and_store(request: ScrapeRequest):
 def get_vibe_tags():
     """Return all distinct vibe tags currently in the recipe library."""
     result = supabase.table("recipes").select("vibe_tags").execute()
-    tags: set[str] = set()
+    tags: Set[str] = set()
     for row in result.data:
         tags.update(row.get("vibe_tags") or [])
     return sorted(tags)
