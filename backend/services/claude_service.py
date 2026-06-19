@@ -9,8 +9,11 @@ COST_OPTIONS = ["budget", "mid", "expensive"]
 EQUIPMENT_OPTIONS = ["oven", "stovetop", "grill", "slow-cooker", "stand-mixer", "food-processor", "no-cook", "instant-pot", "deep-fryer"]
 
 
+COURSE_OPTIONS = ["appetizer", "main", "dessert", "drink"]
+
+
 def tag_recipe(title: str, ingredients: list, instructions: Optional[str]) -> dict:
-    """Use Claude Haiku to auto-tag a recipe with vibe, season, cost, and equipment labels."""
+    """Use Claude Haiku to auto-tag a recipe with all labels including cuisine and course type."""
     client = anthropic.Anthropic()
 
     prompt = f"""Tag this recipe with appropriate labels.
@@ -21,6 +24,8 @@ Instructions: {instructions or 'N/A'}
 
 Return ONLY valid JSON, no markdown:
 {{
+  "course_type": "",
+  "cuisine_tags": [],
   "vibe_tags": [],
   "season_tags": [],
   "cost_level": "",
@@ -28,6 +33,8 @@ Return ONLY valid JSON, no markdown:
 }}
 
 Valid values:
+- course_type: one of {COURSE_OPTIONS}
+- cuisine_tags: list of cuisine styles the recipe belongs to (e.g. ["Italian", "Mediterranean"])
 - vibe_tags: subset of {VIBE_OPTIONS}
 - season_tags: subset of {SEASON_OPTIONS}
 - cost_level: one of {COST_OPTIONS}
@@ -35,14 +42,15 @@ Valid values:
 
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=256,
+        max_tokens=384,
         messages=[{"role": "user", "content": prompt}],
     )
 
     result = json.loads(message.content[0].text)
-    # Validate cost_level
     if result.get("cost_level") not in COST_OPTIONS:
         result["cost_level"] = "mid"
+    if result.get("course_type") not in COURSE_OPTIONS:
+        result["course_type"] = "main"
     return result
 
 

@@ -38,8 +38,12 @@ class IngredientOut(BaseModel):
 
 class ScrapeRequest(BaseModel):
     url: str
-    course_type: str
-    cuisine_tags: List[str] = []
+    course_type: Optional[str] = None   # optional — Claude auto-detects
+    cuisine_tags: List[str] = []        # user additions, merged with Claude's
+    vibe_tags: List[str] = []
+    season_tags: List[str] = []
+    cost_level: Optional[str] = None
+    equipment_tags: List[str] = []
 
 
 class MenuRecipe(BaseModel):

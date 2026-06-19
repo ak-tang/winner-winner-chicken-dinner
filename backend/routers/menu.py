@@ -6,6 +6,30 @@ from database import supabase
 router = APIRouter()
 
 
+@router.get("/")
+def list_menus():
+    result = supabase.table("menus").select(
+        "id, created_at, constraints_json, recipes_json"
+    ).order("created_at", desc=True).limit(50).execute()
+
+    menus = []
+    for row in result.data:
+        constraints = row['constraints_json'] or {}
+        recipes = row['recipes_json'] or []
+        menus.append({
+            "id": row['id'],
+            "created_at": row['created_at'],
+            "occasion": constraints.get('occasion'),
+            "guest_count": constraints.get('guest_count'),
+            "cuisines": constraints.get('cuisines', []),
+            "vibe": constraints.get('vibe'),
+            "courses": list({r['course_type'] for r in recipes}),
+            "recipe_titles": [r['title'] for r in recipes[:3]],
+            "first_image": recipes[0].get('image_url') if recipes else None,
+        })
+    return menus
+
+
 def _recipe_to_summary(r: dict) -> dict:
     return {
         "id": str(r['id']),

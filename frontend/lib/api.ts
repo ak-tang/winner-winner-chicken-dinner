@@ -103,12 +103,49 @@ export async function listVibeTags(): Promise<string[]> {
   return apiFetch('/api/recipes/vibe-tags');
 }
 
-export async function scrapeRecipe(url: string, courseType: string, cuisineTags: string[]) {
+export interface ScrapeOptions {
+  course_type?: string;
+  cuisine_tags?: string[];
+  vibe_tags?: string[];
+  season_tags?: string[];
+  cost_level?: string;
+  equipment_tags?: string[];
+}
+
+export interface ScrapeResult {
+  id: string;
+  title: string;
+  course_type: string;
+  cuisine_tags: string[];
+  vibe_tags: string[];
+  season_tags: string[];
+  cost_level: string | null;
+  equipment_tags: string[];
+  dietary_tags: string[];
+}
+
+export async function scrapeRecipe(url: string, options: ScrapeOptions = {}): Promise<ScrapeResult> {
   return apiFetch('/api/recipes/scrape', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url, course_type: courseType, cuisine_tags: cuisineTags }),
+    body: JSON.stringify({ url, ...options }),
   });
+}
+
+export interface MenuSummary {
+  id: string;
+  created_at: string;
+  occasion: string | null;
+  guest_count: number;
+  cuisines: string[];
+  vibe: string | null;
+  courses: string[];
+  recipe_titles: string[];
+  first_image: string | null;
+}
+
+export async function listMenus(): Promise<MenuSummary[]> {
+  return apiFetch('/api/menu/');
 }
 
 export async function listRecipes(courseType?: string) {
