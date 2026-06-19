@@ -15,8 +15,8 @@ def tag_recipe(title: str, ingredients: list[str], instructions: str | None) -> 
     prompt = f"""Tag this recipe with appropriate labels.
 
 Recipe: {title}
-Ingredients: {', '.join(ingredients[:15])}
-Instructions snippet: {(instructions or '')[:400]}
+Ingredients: {', '.join(ingredients)}
+Instructions: {instructions or 'N/A'}
 
 Return ONLY valid JSON, no markdown:
 {{
